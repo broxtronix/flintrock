@@ -136,6 +136,8 @@ def cli(cli_context, config, provider):
 @click.option('--ec2-placement-group')
 @click.option('--ec2-tenancy', default='default')
 @click.option('--ec2-ebs-optimized/--no-ec2-ebs-optimized', default=False)
+@click.option('--ec2-ebs-root-vol-type', default='standard')
+@click.option('--ec2-ebs-root-vol-size', default='10')
 @click.option('--ec2-instance-initiated-shutdown-behavior', default='stop',
               type=click.Choice(['stop', 'terminate']))
 @click.pass_context
@@ -155,6 +157,8 @@ def launch(
         ec2_subnet_id,
         ec2_placement_group,
         ec2_tenancy,
+        ec2_ebs_root_vol_type,
+        ec2_ebs_root_vol_size,
         ec2_ebs_optimized,
         ec2_instance_initiated_shutdown_behavior):
     """
@@ -178,6 +182,8 @@ def launch(
             subnet_id=ec2_subnet_id,
             placement_group=ec2_placement_group,
             tenancy=ec2_tenancy,
+            ebs_root_vol_type=ec2_ebs_root_vol_type,
+            ebs_root_vol_size=ec2_ebs_root_vol_size,
             ebs_optimized=ec2_ebs_optimized,
             instance_initiated_shutdown_behavior=ec2_instance_initiated_shutdown_behavior)
     else:

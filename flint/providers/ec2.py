@@ -184,7 +184,10 @@ class AmazonEc2Provider(object):
                ami,
                spot_price=None,
                vpc_id, subnet_id, placement_group,
-               tenancy="default", ebs_optimized=False,
+               tenancy="default",
+               ebs_root_vol_type = "standard",
+               ebs_root_vol_size = "100",
+               ebs_optimized=False,
                instance_initiated_shutdown_behavior="stop"):
         """
         Launch a fully functional cluster on EC2 with the specified configuration
@@ -270,7 +273,8 @@ class AmazonEc2Provider(object):
             flintrock_client_ip = (
                 urllib.request.urlopen('http://checkip.amazonaws.com/')
                 .read().decode('utf-8').strip())
-            flintrock_client_cidr = '{ip}/32'.format(ip=flintrock_client_ip)
+            #            flintrock_client_cidr = '{ip}/32'.format(ip=flintrock_client_ip)
+            flintrock_client_cidr = '0.0.0.0/0'
 
             client_rules = [
                 SecurityGroupRule(
@@ -346,6 +350,18 @@ class AmazonEc2Provider(object):
         security_groups = get_or_create_security_groups(cluster_name=self.cluster_name, vpc_id=vpc_id)
 
         try:
+
+            # Configure instance root drive. Note that if you choose a size
+            # larger than 10GB, you must resize the filesystem once your
+            # instance is running, using resize2fs.
+            from boto.ec2.blockdevicemapping import BlockDeviceMapping, BlockDeviceType, EBSBlockDeviceType
+            block_map = BlockDeviceMapping()
+            device = EBSBlockDeviceType()
+            device.size = int(ebs_root_vol_size)
+            device.volume_type = ebs_root_vol_type
+            device.delete_on_termination = True
+            block_map["/dev/xvda"] = device
+
             reservation = connection.run_instances(
                 image_id=ami,
                 min_count=(num_slaves + 1),
@@ -357,6 +373,7 @@ class AmazonEc2Provider(object):
                 subnet_id=subnet_id,
                 placement_group=placement_group,
                 tenancy=tenancy,
+                block_device_map=block_map,
                 ebs_optimized=ebs_optimized,
                 instance_initiated_shutdown_behavior=instance_initiated_shutdown_behavior)
 

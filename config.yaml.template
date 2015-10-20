@@ -24,6 +24,8 @@ providers:
     # subnet-id: <id>
     # placement-group: <name>
     tenancy: default  # default | dedicated
+    ebs-root-vol-type: gp2   # standard | gp2
+    ebs-root-vol-size: 20    # size in GB
     ebs-optimized: no  # yes | no
     instance-initiated-shutdown-behavior: terminate  # terminate | stop
     # delete-groups-on-destroy: no  # yes | no
